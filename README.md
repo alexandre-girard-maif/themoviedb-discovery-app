@@ -60,6 +60,26 @@ npx tsx src/back-end/backend-cli.ts create-database --path ./data/ma-base.sqlite
 
 La commande initialise le schéma sans supprimer les données d'une base existante.
 
+## Gestion des pays
+
+Un CSV de pays doit contenir exactement les colonnes `code` et `name`, dans n'importe quel ordre. Le fichier d'exemple est disponible dans `data/countries.csv` :
+
+```sh
+node src/back-end/backend-cli.ts add-countries ./data/countries.csv
+node src/back-end/backend-cli.ts --path ./data/custom-movies.sqlite add-countries ./data/countries.csv
+```
+
+La commande `add-countries` valide entièrement le CSV avant d'ouvrir la base, insère les nouveaux pays et actualise les noms déjà présents.
+
+Supprimez les pays qui ne sont associés à aucun film avec :
+
+```sh
+node src/back-end/backend-cli.ts clean-countries
+node src/back-end/backend-cli.ts --path ./data/custom-movies.sqlite clean-countries
+```
+
+`clean-countries` conserve les pays référencés par au moins un film dans `production_countries`.
+
 ## API locale
 
 | Méthode | Route                 | Description                                                       |

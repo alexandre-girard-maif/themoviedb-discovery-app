@@ -61,3 +61,26 @@ export const getCountryByCode = findCountryByCode;
 export const getCountries = listCountries;
 export const insertOrUpdateCountries = upsertCountries;
 export const saveCountries = upsertCountries;
+
+export function deleteUnusedCountries(database: DatabaseSync): number {
+  database.exec('BEGIN TRANSACTION');
+  try {
+    const result = database
+      .prepare(`
+        DELETE FROM countries
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM production_countries
+          WHERE production_countries.country_code = countries.code
+        )
+      `)
+      .run();
+    database.exec('COMMIT');
+    return Number(result.changes);
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
+}
+
+export const cleanCountries = deleteUnusedCountries;

@@ -3,6 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { initializeSchema } from './schema.ts';
 import {
+  deleteUnusedCountries,
   findCountryByCode,
   listCountries,
   upsertCountries,
@@ -90,5 +91,55 @@ describe('country-repository.ts', () => {
     expect(() => upsertCountries(database, [{ code: 'CA', name: '' }])).toThrow(
       /CHECK constraint failed/,
     );
+  });
+
+  it('deletes only countries not associated with a movie', () => {
+    // Arrange
+    database
+      .prepare(`
+        INSERT INTO movies (
+          id, title, original_title, original_language, overview, collected_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `)
+      .run(1, 'Dune', 'Dune', 'en', 'Overview', '2026-11-03T00:00:00Z');
+    upsertCountries(database, [
+      { code: 'FR', name: 'France' },
+      { code: 'US', name: 'United States' },
+    ]);
+    database
+      .prepare(
+        'INSERT INTO production_countries (movie_id, country_code) VALUES (?, ?)',
+      )
+      .run(1, 'FR');
+
+    // Act
+    const removed = deleteUnusedCountries(database);
+
+    // Assert
+    expect(removed).toBe(1);
+    expect(findCountryByCode(database, 'FR')).toEqual({
+      code: 'FR',
+      name: 'France',
+    });
+    expect(findCountryByCode(database, 'US')).toBeUndefined();
+  });
+
+  it('rolls back cleanup when SQLite rejects the deletion', () => {
+    // Arrange
+    upsertCountries(database, [{ code: 'FR', name: 'France' }]);
+    database.exec(`
+      CREATE TRIGGER reject_country_delete
+      BEFORE DELETE ON countries
+      BEGIN
+        SELECT RAISE(ABORT, 'cleanup rejected');
+      END;
+    `);
+
+    // Act and Assert
+    expect(() => deleteUnusedCountries(database)).toThrow(/cleanup rejected/);
+    expect(findCountryByCode(database, 'FR')).toEqual({
+      code: 'FR',
+      name: 'France',
+    });
   });
 });
