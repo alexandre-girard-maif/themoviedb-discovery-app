@@ -34,6 +34,21 @@ describe('backend-cli.ts', () => {
   });
 
   describe('create-database', () => {
+    it('creates the default database when invoked without arguments', async () => {
+      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      try {
+        await runCliWithArgs([]);
+
+        expect(getDatabaseMock).toHaveBeenCalledWith(DEFAULT_DATABASE_PATH);
+        expect(closeMock).toHaveBeenCalledOnce();
+        expect(logSpy).toHaveBeenCalledWith(
+          `Database available at ${resolve(DEFAULT_DATABASE_PATH)}`,
+        );
+      } finally {
+        logSpy.mockRestore();
+      }
+    });
+
     it('uses the default database path when the subcommand has no path option', async () => {
       const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       try {
@@ -49,11 +64,43 @@ describe('backend-cli.ts', () => {
       }
     });
 
-    it('uses the path passed in --path', async () => {
+    it('uses the custom path passed after create-database', async () => {
       const customDatabasePath = './data/custom-movies.sqlite';
       const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       try {
         await runCliWithArgs(['create-database', '--path', customDatabasePath]);
+
+        expect(getDatabaseMock).toHaveBeenCalledWith(customDatabasePath);
+        expect(closeMock).toHaveBeenCalledOnce();
+        expect(logSpy).toHaveBeenCalledWith(
+          `Database available at ${resolve(customDatabasePath)}`,
+        );
+      } finally {
+        logSpy.mockRestore();
+      }
+    });
+
+    it('uses the custom path passed before create-database', async () => {
+      const customDatabasePath = './data/custom-movies.sqlite';
+      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      try {
+        await runCliWithArgs(['--path', customDatabasePath, 'create-database']);
+
+        expect(getDatabaseMock).toHaveBeenCalledWith(customDatabasePath);
+        expect(closeMock).toHaveBeenCalledOnce();
+        expect(logSpy).toHaveBeenCalledWith(
+          `Database available at ${resolve(customDatabasePath)}`,
+        );
+      } finally {
+        logSpy.mockRestore();
+      }
+    });
+
+    it('uses --path without create-database as the default action', async () => {
+      const customDatabasePath = './data/custom-movies.sqlite';
+      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      try {
+        await runCliWithArgs(['--path', customDatabasePath]);
 
         expect(getDatabaseMock).toHaveBeenCalledWith(customDatabasePath);
         expect(closeMock).toHaveBeenCalledOnce();
