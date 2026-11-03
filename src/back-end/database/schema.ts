@@ -66,7 +66,7 @@ function initializeMoviesSchema(database: DatabaseSync): void {
   database.exec(`
     CREATE TABLE IF NOT EXISTS movies (
       -- The unique identifier for the movie
-      id INTEGER PRIMARY KEY,
+      id INTEGER PRIMARY KEY CHECK(id > 0),
       -- The title of the movie
       title TEXT NOT NULL,
       -- The original title of the movie
@@ -80,11 +80,11 @@ function initializeMoviesSchema(database: DatabaseSync): void {
       -- The year of the movie's release, generated from the release_date
       release_year INTEGER GENERATED ALWAYS AS (CAST(strftime('%Y', release_date) AS INTEGER)) STORED,
       -- The popularity score of the movie
-      popularity REAL,
+      popularity REAL CHECK(popularity IS NULL OR popularity >= 0),
       -- The average vote score of the movie
-      vote_average REAL,
+      vote_average REAL CHECK(vote_average IS NULL OR (vote_average >= 0 AND vote_average <= 10)),
       -- The total number of votes the movie has received
-      vote_count INTEGER,
+      vote_count INTEGER CHECK(vote_count IS NULL OR vote_count >= 0),
       -- The path to the movie's poster image
       poster_path TEXT,
       -- The path to the movie's backdrop image
@@ -111,9 +111,9 @@ export function initializeGenresSchema(database: DatabaseSync): void {
   database.exec(`
     CREATE TABLE IF NOT EXISTS genres (
       -- The unique identifier for the genre
-      id INTEGER PRIMARY KEY,
+      id INTEGER PRIMARY KEY CHECK(id > 0),
       -- The name of the genre
-      name TEXT NOT NULL
+      name TEXT NOT NULL CHECK(name <> '')
     );
     CREATE TABLE IF NOT EXISTS movie_genres (
       -- The ID of the movie
@@ -136,9 +136,9 @@ function initializeCountriesSchema(database: DatabaseSync): void {
   database.exec(`
     CREATE TABLE IF NOT EXISTS countries (
       -- The unique code for the country
-      code TEXT PRIMARY KEY,
+      code TEXT PRIMARY KEY CHECK(code GLOB '[A-Z][A-Z]'),
       -- The name of the country
-      name TEXT NOT NULL
+      name TEXT NOT NULL CHECK(name <> '')
     );
     CREATE TABLE IF NOT EXISTS production_countries (
       -- The ID of the movie

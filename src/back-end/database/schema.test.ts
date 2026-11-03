@@ -130,5 +130,104 @@ describe('schema.ts', () => {
         database.close();
       }
     });
+
+    it('enforces data constraints and unique movie associations', () => {
+      // Arrange
+      const database = new DatabaseSync(':memory:');
+      initializeSchema(database);
+
+      database
+        .prepare(`
+          INSERT INTO movies (
+            id, title, original_title, original_language, overview,
+            release_date, popularity, vote_average, vote_count,
+            runtime_minutes, budget, revenue, collected_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `)
+        .run(
+          1,
+          'Dune',
+          'Dune',
+          'en',
+          'Overview',
+          '2021-09-15',
+          null,
+          null,
+          null,
+          155,
+          null,
+          null,
+          '2026-11-03T00:00:00Z',
+        );
+      database
+        .prepare('INSERT INTO genres (id, name) VALUES (?, ?)')
+        .run(18, 'Drame');
+      database
+        .prepare('INSERT INTO countries (code, name) VALUES (?, ?)')
+        .run('US', 'United States');
+
+      try {
+        // Act and Assert: unknown TMDB values remain nullable.
+        expect(
+          database
+            .prepare(
+              'SELECT popularity, vote_average, vote_count FROM movies WHERE id = 1',
+            )
+            .get(),
+        ).toEqual({ popularity: null, vote_average: null, vote_count: null });
+
+        // Act and Assert: invalid numeric values, names and country codes are rejected.
+        expect(() =>
+          database
+            .prepare('INSERT INTO genres (id, name) VALUES (?, ?)')
+            .run(2, ''),
+        ).toThrow(/CHECK constraint failed/);
+        expect(() =>
+          database
+            .prepare('INSERT INTO countries (code, name) VALUES (?, ?)')
+            .run('usa', 'USA'),
+        ).toThrow(/CHECK constraint failed/);
+        expect(() =>
+          database
+            .prepare('UPDATE movies SET vote_average = ? WHERE id = 1')
+            .run(11),
+        ).toThrow(/CHECK constraint failed/);
+        expect(() =>
+          database
+            .prepare('UPDATE movies SET vote_count = ? WHERE id = 1')
+            .run(-1),
+        ).toThrow(/CHECK constraint failed/);
+
+        // Act: create genre and country associations.
+        database
+          .prepare(
+            'INSERT INTO movie_genres (movie_id, genre_id) VALUES (?, ?)',
+          )
+          .run(1, 18);
+        database
+          .prepare(
+            'INSERT INTO production_countries (movie_id, country_code) VALUES (?, ?)',
+          )
+          .run(1, 'US');
+
+        // Assert: repeated associations are rejected by the composite primary keys.
+        expect(() =>
+          database
+            .prepare(
+              'INSERT INTO movie_genres (movie_id, genre_id) VALUES (?, ?)',
+            )
+            .run(1, 18),
+        ).toThrow(/UNIQUE constraint failed/);
+        expect(() =>
+          database
+            .prepare(
+              'INSERT INTO production_countries (movie_id, country_code) VALUES (?, ?)',
+            )
+            .run(1, 'US'),
+        ).toThrow(/UNIQUE constraint failed/);
+      } finally {
+        database.close();
+      }
+    });
   });
 });
