@@ -74,3 +74,8 @@ export type Genre = {
   id: number;
   name: string;
 };
+
+export type Country = {
+  code: string;
+  name: string;
+};
