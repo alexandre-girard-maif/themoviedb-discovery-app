@@ -69,3 +69,8 @@ export type MovieDetails = Omit<
 export type ApiErrorResponse = {
   error: string;
 };
+
+export type Genre = {
+  id: number;
+  name: string;
+};
