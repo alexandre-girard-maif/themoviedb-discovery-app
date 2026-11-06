@@ -23,6 +23,8 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "vite",
     "dev:server": "tsx watch src/back-end/index.ts",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
     "test": "vitest run --coverage",
     "test:verbose": "vitest run --reporter verbose",
     "prepare": "husky",
