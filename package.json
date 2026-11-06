@@ -41,6 +41,7 @@
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@storybook/addon-docs": "^10.6.6",
+    "@storybook/addon-themes": "^10.6.6",
     "@storybook/react-vite": "^10.6.6",
     "@testing-library/react": "^16.3.3",
     "@types/express": "^5.0.6",

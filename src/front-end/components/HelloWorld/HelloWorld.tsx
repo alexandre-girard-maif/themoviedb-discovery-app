@@ -1,3 +1,5 @@
+import './HelloWorld.css';
+
 interface HelloWorldProps {
   message?: string;
 }
@@ -9,5 +11,5 @@ interface HelloWorldProps {
 export default function HelloWorld({
   message = 'Hello World!',
 }: HelloWorldProps) {
-  return <p>{message}</p>;
+  return <p className="hello-world">{message}</p>;
 }

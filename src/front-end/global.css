@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme='light'] {
   color-scheme: light;
   color: #1c2238;
   --page-background: linear-gradient(
@@ -22,7 +23,8 @@
   text-rendering: optimizeLegibility;
 }
 
-:root[data-theme='dark'] {
+:root[data-theme='dark'],
+[data-theme='dark'] {
   color-scheme: dark;
   --page-background: linear-gradient(
     112deg,

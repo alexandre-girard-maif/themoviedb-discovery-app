@@ -25,3 +25,9 @@ export const CustomMessage: Story = {
     message: 'Welcome to Storybook!',
   },
 };
+
+export const DarkTheme: Story = {
+  globals: {
+    theme: 'dark',
+  },
+};
