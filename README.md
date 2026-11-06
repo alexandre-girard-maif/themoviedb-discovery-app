@@ -54,7 +54,12 @@ npm run storybook
 
 Ouvrez [http://localhost:6006](http://localhost:6006). Storybook fonctionne indépendamment de l'application : le serveur Express et le jeton TMDB ne sont pas nécessaires.
 
-Storybook est configuré, mais ne contient pas encore de stories. Pour ajouter un composant, créez un fichier `NomDuComposant.stories.tsx` à côté de celui-ci dans `src/front-end/`.
+Le composant [HelloWorld](./src/front-end/components/HelloWorld/HelloWorld.tsx) sert d'exemple : sa prop optionnelle `message` remplace le texte par défaut `Hello World!`.
+
+- Ses [stories](./src/front-end/components/HelloWorld/HelloWorld.stories.tsx) présentent le message par défaut et un message personnalisé. Le contrôle `message` permet de modifier le texte dans Storybook.
+- Ses [tests unitaires](./src/front-end/components/HelloWorld/HelloWorld.test.tsx) vérifient ces deux comportements avec Vitest et React Testing Library, en suivant le pattern Arrange-Act-Assert et en nettoyant le DOM après chaque test.
+
+Pour ajouter un composant, créez ses fichiers `NomDuComposant.stories.tsx` et `NomDuComposant.test.tsx` à côté de celui-ci dans `src/front-end/`. Utilisez les types `Meta` et `StoryObj` de Storybook pour les stories et vérifiez les sorties visibles avec les requêtes accessibles de React Testing Library.
 
 Pour générer une version statique de Storybook :
 
