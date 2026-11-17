@@ -69,3 +69,6 @@ export type MovieDetails = Omit<
 export type ApiErrorResponse = {
   error: string;
 };
+
+// TypeScript type for a movie genre, containing an ID and a name.
+export type Genre = { id: number; name: string };
