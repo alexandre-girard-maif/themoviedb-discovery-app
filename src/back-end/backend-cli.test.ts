@@ -74,6 +74,7 @@ describe('backend-cli.ts', () => {
     it('uses the database and CSV paths passed as options', async () => {
       const databasePath = './data/custom-movies.sqlite';
       const csvPath = './data/custom-genres.csv';
+      readFileSyncMock.mockReturnValue('id,name\n28,Action\n35,Comedy');
       const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       try {
         await runCliWithArgs([
@@ -86,7 +87,17 @@ describe('backend-cli.ts', () => {
 
         expect(readFileSyncMock).toHaveBeenCalledWith(csvPath, 'utf8');
         expect(getDatabaseMock).toHaveBeenCalledWith(databasePath);
+        expect(upsertGenresMock).toHaveBeenCalledWith(
+          getDatabaseMock.mock.results[0].value,
+          [
+            { id: 28, name: 'Action' },
+            { id: 35, name: 'Comedy' },
+          ],
+        );
         expect(closeMock).toHaveBeenCalledOnce();
+        expect(logSpy).toHaveBeenCalledWith(
+          `Added or updated 2 genres in ${resolve(databasePath)}`,
+        );
       } finally {
         logSpy.mockRestore();
       }
