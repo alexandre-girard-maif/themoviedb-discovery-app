@@ -86,6 +86,18 @@ npx tsx src/back-end/backend-cli.ts create-database --path ./data/ma-base.sqlite
 
 La commande initialise le schéma sans supprimer les données d'une base existante.
 
+Pour importer les genres depuis `data/genres.csv` dans la base par défaut :
+
+```sh
+npx tsx src/back-end/backend-cli.ts add-genres
+```
+
+Utilisez `--path` pour choisir la base et `--csv` pour fournir un autre fichier :
+
+```sh
+npx tsx src/back-end/backend-cli.ts add-genres --path ./data/ma-base.sqlite --csv ./data/genres.csv
+```
+
 ## API locale
 
 | Méthode | Route                 | Description                                                       |
